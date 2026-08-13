@@ -7,7 +7,7 @@ export interface ICounter {
 
 const CounterSchema = new Schema<ICounter>({
   _id: { type: String, required: true },
-  seq: { type: Number, default: 0 },
+  seq: { type: Number, default: 996 },
 });
 
 export const Counter =
@@ -21,7 +21,7 @@ export const Counter =
 export async function getNextSequence(name: string): Promise<number> {
   const result = await Counter.findOneAndUpdate(
     { _id: name },
-    { $inc: { seq: 1 } },
+    { $setOnInsert: { seq: 996 }, $inc: { seq: 5 } },
     { new: true, upsert: true }
   );
   return result.seq;
