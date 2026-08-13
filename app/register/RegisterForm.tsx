@@ -18,6 +18,11 @@ interface FormErrors {
 
 const initialState: FormState = { fullName: "", whatsappNumber: "", address: "" };
 
+function formatWhatsappDisplay(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  return digits ? `+91 ${digits}` : "+91";
+}
+
 export default function RegisterForm() {
   const [form, setForm] = useState<FormState>(initialState);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -32,8 +37,7 @@ export default function RegisterForm() {
   }
 
   function handleWhatsappChange(value: string) {
-    // Only allow digits while typing.
-    const filtered = value.replace(/[^0-9]/g, "");
+    const filtered = value.replace(/\D/g, "").slice(0, 10);
     setForm((f) => ({ ...f, whatsappNumber: filtered }));
   }
 
@@ -52,8 +56,8 @@ export default function RegisterForm() {
 
     if (!whatsappNumber) {
       next.whatsappNumber = "WhatsApp number is required.";
-    } else if (!WHATSAPP_REGEX.test(whatsappNumber)) {
-      next.whatsappNumber = "Enter a valid WhatsApp number (digits only).";
+    } else if (!WHATSAPP_REGEX.test(`91${whatsappNumber}`)) {
+      next.whatsappNumber = "Enter a valid Indian WhatsApp number (10 digits).";
     }
 
     if (!address) {
@@ -71,10 +75,15 @@ export default function RegisterForm() {
 
     setSubmitting(true);
     try {
+      const payload = {
+        ...form,
+        whatsappNumber: `91${form.whatsappNumber}`,
+      };
+
       const res = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
 
@@ -113,12 +122,6 @@ export default function RegisterForm() {
             ? "It's been sent to your WhatsApp number."
             : "We had trouble delivering it to WhatsApp — our team will follow up."}
         </p>
-        <button
-          onClick={() => setVoucherId(null)}
-          className="text-sm text-gold-dark underline underline-offset-4 hover:text-gold"
-        >
-          Register another person
-        </button>
       </div>
     );
   }
@@ -164,9 +167,9 @@ export default function RegisterForm() {
           id="whatsappNumber"
           type="tel"
           inputMode="numeric"
-          value={form.whatsappNumber}
+          value={formatWhatsappDisplay(form.whatsappNumber)}
           onChange={(e) => handleWhatsappChange(e.target.value)}
-          placeholder="e.g. 919876543210"
+          placeholder="+91 9876543210"
           aria-invalid={!!errors.whatsappNumber}
           aria-describedby={errors.whatsappNumber ? "whatsapp-error" : undefined}
           className="w-full rounded-lg border border-line bg-parchment/40 px-4 py-2.5 text-ink placeholder:text-charcoal/40 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition"

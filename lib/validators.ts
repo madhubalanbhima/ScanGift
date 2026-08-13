@@ -2,8 +2,22 @@
 // Disallows leading/trailing/double spaces or dots and any digits/special characters.
 export const FULL_NAME_REGEX = /^[A-Za-z]+(?:[ .][A-Za-z]+)*\.?$/;
 
-// Digits only, 7–15 characters (covers international WhatsApp numbers with country code).
-export const WHATSAPP_REGEX = /^[0-9]{7,15}$/;
+// Indian WhatsApp numbers: either 10 digits or 12 digits with a 91 country code prefix.
+export const WHATSAPP_REGEX = /^(?:91)?[1-9]\d{9}$/;
+
+export function normalizeWhatsappNumber(input: string): string {
+  const digits = (input ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+
+  const localNumber = digits.startsWith("91") ? digits.slice(2) : digits;
+  const trimmed = localNumber.replace(/^0+/, "");
+
+  if (trimmed.length !== 10) {
+    return digits.length === 12 && digits.startsWith("91") ? digits : "";
+  }
+
+  return `91${trimmed}`;
+}
 
 export interface RegistrationInput {
   fullName: string;
@@ -23,7 +37,7 @@ export function validateRegistration(
   const errors: ValidationErrors = {};
 
   const fullName = (input.fullName ?? "").trim();
-  const whatsappNumber = (input.whatsappNumber ?? "").trim();
+  const whatsappNumber = normalizeWhatsappNumber(input.whatsappNumber ?? "");
   const address = (input.address ?? "").trim();
 
   if (!fullName) {
@@ -36,7 +50,7 @@ export function validateRegistration(
   if (!whatsappNumber) {
     errors.whatsappNumber = "WhatsApp number is required.";
   } else if (!WHATSAPP_REGEX.test(whatsappNumber)) {
-    errors.whatsappNumber = "WhatsApp number must contain digits only (7–15 digits).";
+    errors.whatsappNumber = "WhatsApp number must be a valid 10-digit mobile number with +91.";
   }
 
   if (!address) {
