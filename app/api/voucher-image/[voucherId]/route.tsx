@@ -9,11 +9,14 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { voucherId: string } }
 ) {
-  let voucherId = decodeURIComponent(params.voucherId).trim();
-  if (!voucherId.startsWith("#")) voucherId = `#${voucherId}`;
+  const rawVoucherId = decodeURIComponent(params.voucherId).trim();
+  const normalizedVoucherId = rawVoucherId.replace(/^#/, "");
+  const candidateIds = Array.from(
+    new Set([rawVoucherId, normalizedVoucherId, `#${normalizedVoucherId}`])
+  );
 
   await connectToDatabase();
-  const customer = await Customer.findOne({ voucherId }).lean();
+  const customer = await Customer.findOne({ voucherId: { $in: candidateIds } }).lean();
 
   if (!customer) {
     return new Response("Voucher not found", { status: 404 });
@@ -49,6 +52,63 @@ export async function GET(
             overflow: "hidden",
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              inset: "28px 28px auto 28px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: "860px",
+                background: "#0d0d09",
+                border: "2px solid #d7ae52",
+                padding: "18px 24px 12px",
+                textAlign: "center",
+                boxShadow: "0 0 0 3px rgba(215,174,82,0.18)",
+              }}
+            >
+              <div
+                style={{
+                  color: "#f4d36d",
+                  fontSize: "26px",
+                  fontWeight: 900,
+                  letterSpacing: "6px",
+                  textTransform: "uppercase",
+                  marginBottom: "8px",
+                }}
+              >
+                Bhima Gold
+              </div>
+              <div
+                style={{
+                  color: "#f4d36d",
+                  fontSize: "62px",
+                  fontWeight: 900,
+                  letterSpacing: "10px",
+                  textTransform: "uppercase",
+                  lineHeight: 1.0,
+                }}
+              >
+                B H I M A
+              </div>
+              <div
+                style={{
+                  color: "#f4d36d",
+                  fontSize: "18px",
+                  letterSpacing: "5px",
+                  textTransform: "uppercase",
+                  marginTop: "12px",
+                }}
+              >
+                Gold • Diamonds • Silver • Platinum
+              </div>
+            </div>
+          </div>
+
           {/* corner ornament */}
           <div
             style={{
@@ -79,6 +139,7 @@ export async function GET(
               justifyContent: "space-between",
               padding: "64px",
               width: "100%",
+              marginTop: "160px",
             }}
           >
             <div style={{ display: "flex", flexDirection: "column" }}>

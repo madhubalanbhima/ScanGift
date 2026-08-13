@@ -5,6 +5,7 @@ export interface ICustomer {
   fullName: string;
   whatsappNumber: string;
   address: string;
+  pincode: string;
   voucherId: string; // e.g. "#egold-00001"
   voucherSequence: number; // e.g. 1
   deliveryStatus: "sent" | "failed" | "pending";
@@ -18,6 +19,7 @@ const CustomerSchema = new Schema<ICustomer>(
     fullName: { type: String, required: true, trim: true },
     whatsappNumber: { type: String, required: true, trim: true, index: true },
     address: { type: String, required: true, trim: true },
+    pincode: { type: String, required: true, trim: true },
     voucherId: { type: String, required: true, unique: true, index: true },
     voucherSequence: { type: Number, required: true },
     deliveryStatus: {

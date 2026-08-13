@@ -14,12 +14,13 @@ export async function GET(
 
   try {
     await connectToDatabase();
-    // Voucher IDs are stored with a leading "#" (e.g. "#egold-00001"); accept the
-    // param with or without it and with or without URL-encoding.
-    let voucherId = decodeURIComponent(params.voucherId).trim();
-    if (!voucherId.startsWith("#")) voucherId = `#${voucherId}`;
+    const rawVoucherId = decodeURIComponent(params.voucherId).trim();
+    const normalizedVoucherId = rawVoucherId.replace(/^#/, "");
+    const candidateIds = Array.from(
+      new Set([rawVoucherId, normalizedVoucherId, `#${normalizedVoucherId}`])
+    );
 
-    const customer = await Customer.findOne({ voucherId }).lean();
+    const customer = await Customer.findOne({ voucherId: { $in: candidateIds } }).lean();
 
     if (!customer) {
       return NextResponse.json(
