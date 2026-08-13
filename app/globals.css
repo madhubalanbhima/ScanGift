@@ -65,3 +65,38 @@ body {
 .stamp {
   transform: rotate(-8deg);
 }
+
+.paper-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.paper-piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 10px;
+  background: var(--paper-color);
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(var(--rot)) translate(var(--x), var(--y));
+  opacity: 0.9;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  animation: burst-pop 0.9s ease-out forwards;
+}
+
+@keyframes burst-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--rot)) translate(0, 0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--rot)) translate(var(--x), var(--y)) scale(1.2);
+  }
+}

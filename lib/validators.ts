@@ -23,12 +23,14 @@ export interface RegistrationInput {
   fullName: string;
   whatsappNumber: string;
   address: string;
+  pincode: string;
 }
 
 export interface ValidationErrors {
   fullName?: string;
   whatsappNumber?: string;
   address?: string;
+  pincode?: string;
 }
 
 export function validateRegistration(
@@ -39,6 +41,7 @@ export function validateRegistration(
   const fullName = (input.fullName ?? "").trim();
   const whatsappNumber = normalizeWhatsappNumber(input.whatsappNumber ?? "");
   const address = (input.address ?? "").trim();
+  const pincode = (input.pincode ?? "").trim();
 
   if (!fullName) {
     errors.fullName = "Full name is required.";
@@ -55,6 +58,12 @@ export function validateRegistration(
 
   if (!address) {
     errors.address = "Address is required.";
+  }
+
+  if (!pincode) {
+    errors.pincode = "Pincode is required.";
+  } else if (!/^\d{6}$/.test(pincode)) {
+    errors.pincode = "Pincode must be a 6-digit number.";
   }
 
   return errors;

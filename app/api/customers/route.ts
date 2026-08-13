@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     const fullName = String(body.fullName).trim();
     const whatsappNumber = normalizeWhatsappNumber(String(body.whatsappNumber).trim());
     const address = String(body.address).trim();
+    const pincode = String(body.pincode ?? "").trim();
 
     await connectToDatabase();
 
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
       fullName,
       whatsappNumber,
       address,
+      pincode,
       voucherId,
       voucherSequence: sequence,
       deliveryStatus: "pending",
