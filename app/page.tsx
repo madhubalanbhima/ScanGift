@@ -1,15 +1,13 @@
 import QRCode from "qrcode";
 import Link from "next/link";
-import { headers } from "next/headers";
+
+const STATIC_REGISTER_URL =
+  process.env.NEXT_PUBLIC_REGISTER_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://scan-gift-7tio.vercel.app/";
 
 async function getRegisterUrl() {
-  if (process.env.NEXT_PUBLIC_BASE_URL) {
-    return `${process.env.NEXT_PUBLIC_BASE_URL}/register`;
-  }
-  const headersList = headers();
-  const host = headersList.get("host");
-  const proto = headersList.get("x-forwarded-proto") || "https";
-  return `${proto}://${host}/register`;
+  return `${STATIC_REGISTER_URL.replace(/\/$/, "")}`;
 }
 
 export default async function HomePage() {

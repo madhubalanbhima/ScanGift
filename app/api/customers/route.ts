@@ -3,7 +3,11 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Customer } from "@/models/Customer";
 import { getNextSequence } from "@/models/Counter";
 import { formatVoucherId } from "@/lib/voucher";
-import { validateRegistration, hasErrors } from "@/lib/validators";
+import {
+  validateRegistration,
+  hasErrors,
+  normalizeWhatsappNumber,
+} from "@/lib/validators";
 import { sendVoucherOnWhatsApp } from "@/lib/whatsapp";
 import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
 
@@ -24,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const fullName = String(body.fullName).trim();
-    const whatsappNumber = String(body.whatsappNumber).trim();
+    const whatsappNumber = normalizeWhatsappNumber(String(body.whatsappNumber).trim());
     const address = String(body.address).trim();
 
     await connectToDatabase();
