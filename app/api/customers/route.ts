@@ -34,6 +34,20 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
+    // Check if WhatsApp number already exists
+    const existingCustomer = await Customer.findOne({ whatsappNumber });
+    if (existingCustomer) {
+      return NextResponse.json(
+        {
+          success: false,
+          errors: {
+            whatsappNumber: "This WhatsApp number is already registered. Please use a different number.",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     const sequence = await getNextSequence("voucher");
     const voucherId = formatVoucherId(sequence);
 
