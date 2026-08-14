@@ -11,6 +11,18 @@ function csvEscape(value: unknown): string {
   return str;
 }
 
+function formatDateToDDMMYYYY(date: Date): string {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+function formatPhoneNumberForCSV(phoneNumber: string): string {
+  // Add leading apostrophe to prevent Excel scientific notation
+  return `'${phoneNumber}`;
+}
+
 export async function GET(req: NextRequest) {
   const token = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
   if (!isValidSessionToken(token)) {
@@ -35,11 +47,11 @@ export async function GET(req: NextRequest) {
       [
         c.voucherId,
         c.fullName,
-        c.whatsappNumber,
+        formatPhoneNumberForCSV(c.whatsappNumber),
         c.address,
         c.deliveryStatus,
         c.deliveryError || "",
-        new Date(c.createdAt).toISOString(),
+        formatDateToDDMMYYYY(new Date(c.createdAt)),
       ]
         .map(csvEscape)
         .join(",")

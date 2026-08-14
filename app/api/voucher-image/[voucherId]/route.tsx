@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Customer } from "@/models/Customer";
+import * as fs from "fs";
+import * as path from "path";
 
 export const runtime = "nodejs";
 
@@ -21,6 +23,12 @@ export async function GET(
   if (!customer) {
     return new Response("Voucher not found", { status: 404 });
   }
+
+  // Load celebration gif as base64
+  const celebrationGifPath = path.join(process.cwd(), "public/brand/celebration.gif");
+  const gifBuffer = fs.readFileSync(celebrationGifPath);
+  const gifBase64 = gifBuffer.toString("base64");
+  const celebrationGifDataUrl = `data:image/gif;base64,${gifBase64}`;
 
   const issuedDate = new Date(customer.createdAt).toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -108,6 +116,20 @@ export async function GET(
               </div>
             </div>
           </div>
+
+          {/* celebration gif */}
+          <img
+            src={celebrationGifDataUrl}
+            style={{
+              position: "absolute",
+              top: "36px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "120px",
+              height: "120px",
+            }}
+            alt="celebration"
+          />
 
           {/* corner ornament */}
           <div
