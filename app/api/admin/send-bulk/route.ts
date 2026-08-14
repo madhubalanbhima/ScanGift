@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Customer } from "@/models/Customer";
 import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
+import { sendVoucherOnWhatsApp } from "@/lib/whatsapp";
 
 interface BulkSendResult {
   totalCustomers: number;
@@ -15,67 +16,29 @@ interface BulkSendResult {
   }>;
 }
 
+function getBaseUrl(req: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  const host = req.headers.get("host");
+  return `${proto}://${host}`;
+}
+
 async function sendTemplateMessage(
+  req: NextRequest,
   toNumber: string,
   voucherId: string,
   customerName: string
 ): Promise<{ success: boolean; error?: string }> {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const apiVersion = process.env.WHATSAPP_API_VERSION || "v20.0";
+  const voucherImageUrl = `${getBaseUrl(req)}/api/voucher-image/${encodeURIComponent(
+    voucherId
+  )}`;
 
-  if (!token || !phoneNumberId) {
-    return {
-      success: false,
-      error: "WhatsApp credentials not configured",
-    };
-  }
-
-  try {
-    const response = await fetch(
-      `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: toNumber,
-          type: "template",
-          template: {
-            name: "hello_world", // Use your approved template name
-            language: {
-              code: "en_US",
-            },
-            // If your template has parameters, add them here:
-            // parameters: {
-            //   body: {
-            //     parameters: [customerName, voucherId],
-            //   },
-            // },
-          },
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: data?.error?.message || `API error (${response.status})`,
-      };
-    }
-
-    return { success: true };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Unknown error",
-    };
-  }
+  return sendVoucherOnWhatsApp({
+    toNumber,
+    customerName,
+    voucherId,
+    voucherImageUrl,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -86,11 +49,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { templateName = "hello_world", limit } = body;
+    const { limit } = body;
 
     await connectToDatabase();
 
-    // Fetch customers (optionally limit for testing)
     let query = Customer.find();
     if (limit) {
       query = query.limit(parseInt(limit));
@@ -103,6 +65,7 @@ export async function POST(req: NextRequest) {
 
     for (const customer of customers) {
       const result = await sendTemplateMessage(
+        req,
         customer.whatsappNumber,
         customer.voucherId,
         customer.fullName

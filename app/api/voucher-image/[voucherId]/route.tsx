@@ -24,11 +24,11 @@ export async function GET(
     return new Response("Voucher not found", { status: 404 });
   }
 
-  // Load celebration gif as base64
-  const celebrationGifPath = path.join(process.cwd(), "public/brand/celebration.gif");
-  const gifBuffer = fs.readFileSync(celebrationGifPath);
-  const gifBase64 = gifBuffer.toString("base64");
-  const celebrationGifDataUrl = `data:image/gif;base64,${gifBase64}`;
+  // Load Bhima logo image
+  const bhimaImagePath = path.join(process.cwd(), "public/images/Bhima.png");
+  const imageBuffer = fs.readFileSync(bhimaImagePath);
+  const imageBase64 = imageBuffer.toString("base64");
+  const bhimaImageDataUrl = `data:image/png;base64,${imageBase64}`;
 
   const issuedDate = new Date(customer.createdAt).toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -117,9 +117,9 @@ export async function GET(
             </div>
           </div>
 
-          {/* celebration gif */}
+          {/* Bhima logo */}
           <img
-            src={celebrationGifDataUrl}
+            src={bhimaImageDataUrl}
             style={{
               position: "absolute",
               top: "36px",
@@ -128,7 +128,7 @@ export async function GET(
               width: "120px",
               height: "120px",
             }}
-            alt="celebration"
+            alt="Bhima"
           />
 
           {/* corner ornament */}
