@@ -17,7 +17,8 @@ interface BulkSendResult {
 }
 
 function getBaseUrl(req: NextRequest): string {
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  const configured = process.env.NEXT_PUBLIC_BASE_URL;
+  if (configured) return configured.replace(/\/+$/, ""); // strip trailing slash(es)
   const proto = req.headers.get("x-forwarded-proto") || "https";
   const host = req.headers.get("host");
   return `${proto}://${host}`;
@@ -35,7 +36,6 @@ async function sendTemplateMessage(
 
   return sendVoucherOnWhatsApp({
     toNumber,
-    customerName,
     voucherId,
     voucherImageUrl,
   });

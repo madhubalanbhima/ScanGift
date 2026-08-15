@@ -12,7 +12,8 @@ import { sendVoucherOnWhatsApp } from "@/lib/whatsapp";
 import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
 
 function getBaseUrl(req: NextRequest): string {
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+  const configured = process.env.NEXT_PUBLIC_BASE_URL;
+  if (configured) return configured.replace(/\/+$/, ""); // strip trailing slash(es)
   const proto = req.headers.get("x-forwarded-proto") || "https";
   const host = req.headers.get("host");
   return `${proto}://${host}`;
@@ -34,14 +35,14 @@ export async function POST(req: NextRequest) {
 
     await connectToDatabase();
 
-    // Check if WhatsApp number already exists
     const existingCustomer = await Customer.findOne({ whatsappNumber });
     if (existingCustomer) {
       return NextResponse.json(
         {
           success: false,
           errors: {
-            whatsappNumber: "This WhatsApp number is already registered. Please use a different number.",
+            whatsappNumber:
+              "This WhatsApp number is already registered. Please use a different number.",
           },
         },
         { status: 400 }
@@ -61,13 +62,12 @@ export async function POST(req: NextRequest) {
       deliveryStatus: "pending",
     });
 
-    const voucherImageUrl = `${getBaseUrl(req)}/api/voucher-image/${encodeURIComponent(
-      voucherId
-    )}`;
+    // Static voucher image already hosted in the project's public folder —
+    // reliable, no per-request generation, no filesystem/tracing issues.
+    const voucherImageUrl = `${getBaseUrl(req)}/images/Bhima.png`;
 
     const sendResult = await sendVoucherOnWhatsApp({
       toNumber: whatsappNumber,
-      customerName: fullName,
       voucherId,
       voucherImageUrl,
     });
