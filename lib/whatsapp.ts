@@ -1,21 +1,54 @@
 /**
- * Sends the e-voucher image + voucher ID to the customer's WhatsApp number
- * using the Meta WhatsApp Cloud API.
+ * Sends the e-voucher image + voucher ID to the customer's WhatsApp number via the
+ * Veup WhatsApp template API.
  *
  * Required env vars:
- *  - WHATSAPP_TOKEN            Permanent/system-user access token
- *  - WHATSAPP_PHONE_NUMBER_ID  The "Phone number ID" from Meta App > WhatsApp > API Setup
- *  - WHATSAPP_API_VERSION      Optional, defaults to v20.0
- *
- * The number is sent in whatever format you store it in (digits only). If your
- * WhatsApp Business Account requires the country code, make sure the form collects
- * it (e.g. 91XXXXXXXXXX) — adjust WHATSAPP_REGEX in lib/validators.ts if you want
- * to enforce a specific length/prefix.
+ *  - VEUP_PROCESS_KEY
+ *  - VEUP_API_KEY
+ *  - VEUP_CAMPAIGN_NAME
+ *  - VEUP_WABA_TEMPLATE_NAME
+ *  - VEUP_WABA_SERVICE_NAME
  */
 
-interface SendResult {
+export interface SendResult {
   success: boolean;
   error?: string;
+}
+
+async function getVeupAccessToken(): Promise<string> {
+  const processKey = process.env.VEUP_PROCESS_KEY;
+
+  if (!processKey) {
+    throw new Error("VEUP_PROCESS_KEY is not configured.");
+  }
+
+  const response = await fetch("https://c-api.veup.io/auth/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ process_key: processKey }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || data?.error || `Veup auth failed (${response.status})`
+    );
+  }
+
+  const accessToken =
+    data?.access_token ||
+    data?.token ||
+    data?.data?.access_token ||
+    data?.data?.token;
+
+  if (!accessToken) {
+    throw new Error("Veup auth response did not include an access token.");
+  }
+
+  return String(accessToken);
 }
 
 export async function sendVoucherOnWhatsApp(params: {
@@ -24,49 +57,65 @@ export async function sendVoucherOnWhatsApp(params: {
   voucherId: string;
   voucherImageUrl: string;
 }): Promise<SendResult> {
-  const { toNumber, customerName, voucherId, voucherImageUrl } = params;
+  const { toNumber, voucherId, voucherImageUrl } = params;
 
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const apiVersion = process.env.WHATSAPP_API_VERSION || "v20.0";
+  const apiKey = process.env.VEUP_API_KEY;
+  const campaignName = process.env.VEUP_CAMPAIGN_NAME || "voucher_campaign";
+  const templateName = process.env.VEUP_WABA_TEMPLATE_NAME;
+  const serviceName = process.env.VEUP_WABA_SERVICE_NAME;
 
-  if (!token || !phoneNumberId) {
+  if (!apiKey || !templateName || !serviceName) {
     return {
       success: false,
       error:
-        "WhatsApp credentials are not configured (WHATSAPP_TOKEN / WHATSAPP_PHONE_NUMBER_ID).",
+        "Veup WhatsApp settings are not configured (VEUP_API_KEY / VEUP_WABA_TEMPLATE_NAME / VEUP_WABA_SERVICE_NAME).",
     };
   }
 
-  const caption = `Hello ${customerName}, here is your eGold e-voucher.\nVoucher ID: ${voucherId}`;
-
   try {
-    const response = await fetch(
-      `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+    const accessToken = await getVeupAccessToken();
+    const payload = {
+      campaign_name: campaignName,
+      to: {
+        number: toNumber,
+      },
+      delivery: {
+        type: "single",
+        channels: ["waba"],
+      },
+      campaign_data: {
+        waba: {
+          template_name: templateName,
+          service_name: serviceName,
+          media_url: voucherImageUrl,
+          params: [voucherId],
         },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: toNumber,
-          type: "image",
-          image: {
-            link: voucherImageUrl,
-            caption,
-          },
-        }),
-      }
-    );
+      },
+    };
 
-    const data = await response.json();
+    const response = await fetch("https://c-api.veup.io/v1/message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "X-API-Key": apiKey,
+      },
+      body: JSON.stringify({
+        ...payload,
+        api_key: apiKey,
+      }),
+    });
 
-    if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || data?.status === "error" || data?.success === false) {
       return {
         success: false,
-        error: data?.error?.message || `WhatsApp API error (${response.status})`,
+        error:
+          data?.message ||
+          data?.error ||
+          data?.detail ||
+          `Veup API error (${response.status})`,
       };
     }
 
@@ -74,7 +123,7 @@ export async function sendVoucherOnWhatsApp(params: {
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Unknown WhatsApp send error",
+      error: err instanceof Error ? err.message : "Unknown Veup WhatsApp send error",
     };
   }
 }
