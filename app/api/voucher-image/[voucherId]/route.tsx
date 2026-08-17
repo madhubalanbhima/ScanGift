@@ -25,10 +25,10 @@ export async function GET(
   }
 
   // Load Bhima logo image
-  const bhimaImagePath = path.join(process.cwd(), "public/images/Bhima.png");
+  const bhimaImagePath = path.join(process.cwd(), "public/images/ANNA-NAGAR.jpeg");
   const imageBuffer = fs.readFileSync(bhimaImagePath);
   const imageBase64 = imageBuffer.toString("base64");
-  const bhimaImageDataUrl = `data:image/png;base64,${imageBase64}`;
+  const bhimaImageDataUrl = `data:image/jpeg;base64,${imageBase64}`;
 
   const issuedDate = new Date(customer.createdAt).toLocaleDateString("en-IN", {
     day: "2-digit",
