@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     // Static voucher image already hosted in the project's public folder —
     // reliable, no per-request generation, no filesystem/tracing issues.
-    const voucherImageUrl = `${getBaseUrl(req)}/images/Bhima.png`;
+    const voucherImageUrl = `${getBaseUrl(req)}/images/ANNA-NAGAR.jpeg`;
 
     const sendResult = await sendVoucherOnWhatsApp({
       toNumber: whatsappNumber,
