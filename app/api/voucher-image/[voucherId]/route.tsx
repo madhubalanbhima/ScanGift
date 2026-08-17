@@ -25,7 +25,7 @@ export async function GET(
   }
 
   // Load Bhima logo image
-  const bhimaImagePath = path.join(process.cwd(), "public/images/ANNA-NAGAR.jpeg");
+  const bhimaImagePath = path.join(process.cwd(), "public/images/annanagar.jpeg");
   const imageBuffer = fs.readFileSync(bhimaImagePath);
   const imageBase64 = imageBuffer.toString("base64");
   const bhimaImageDataUrl = `data:image/jpeg;base64,${imageBase64}`;
