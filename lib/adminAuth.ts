@@ -1,6 +1,21 @@
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
+export const ADMIN_TOKEN_STORAGE_KEY = "egold_admin_token";
+
+export function getStoredAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
+}
+
+export function getAdminAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  const token = getStoredAdminToken();
+  return {
+    ...extraHeaders,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 function getJwtSecret(): string {
   const secret = process.env.ADMIN_JWT_SECRET;
   if (!secret) {
