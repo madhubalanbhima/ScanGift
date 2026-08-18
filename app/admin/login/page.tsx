@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ADMIN_TOKEN_STORAGE_KEY } from "@/lib/adminAuth";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -24,6 +25,12 @@ export default function AdminLoginPage() {
         setError(data?.message || "Login failed.");
         return;
       }
+
+      const token = data?.token;
+      if (token) {
+        localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
+      }
+
       router.push("/admin");
       router.refresh();
     } catch {

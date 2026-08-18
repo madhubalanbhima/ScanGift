@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ADMIN_TOKEN_STORAGE_KEY, getAdminAuthHeaders } from "@/lib/adminAuth";
 
 interface CustomerRow {
   id: string;
@@ -38,7 +39,11 @@ export default function AdminTable({ customers }: { customers: CustomerRow[] }) 
   async function handleLogout() {
     setLoggingOut(true);
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: getAdminAuthHeaders(),
+      });
       router.push("/admin/login");
       router.refresh();
     } finally {
@@ -108,7 +113,15 @@ export default function AdminTable({ customers }: { customers: CustomerRow[] }) 
                   </span>
                 </td>
                 <td className="px-5 py-3 text-charcoal/60 whitespace-nowrap">
-                  {new Date(c.createdAt).toLocaleString()}
+                  {new Date(c.createdAt).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                  })}
                 </td>
               </tr>
             ))}

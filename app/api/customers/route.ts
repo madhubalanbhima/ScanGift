@@ -62,9 +62,11 @@ export async function POST(req: NextRequest) {
       deliveryStatus: "pending",
     });
 
-    // Static voucher image already hosted in the project's public folder —
-    // reliable, no per-request generation, no filesystem/tracing issues.
-    const voucherImageUrl = `${getBaseUrl(req)}/images/annanagar.jpeg`;
+    // Media URL must point to the generated voucher image endpoint so each voucher
+    // has a unique image tied to its customer-specific voucher ID.
+    const voucherImageUrl = `${getBaseUrl(req)}/api/voucher-image/${encodeURIComponent(
+      voucherId
+    )}`;
 
     const sendResult = await sendVoucherOnWhatsApp({
       toNumber: whatsappNumber,

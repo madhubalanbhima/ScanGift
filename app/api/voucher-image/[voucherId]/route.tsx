@@ -3,8 +3,6 @@ import { NextRequest } from "next/server";
 import QRCode from "qrcode";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Customer } from "@/models/Customer";
-import * as fs from "fs";
-import * as path from "path";
 
 export const runtime = "nodejs";
 
@@ -14,6 +12,12 @@ function getBaseUrl(req: NextRequest): string {
   const proto = req.headers.get("x-forwarded-proto") || "https";
   const host = req.headers.get("host");
   return `${proto}://${host}`;
+}
+
+function getBranchImageUrl(req: NextRequest): string {
+  const configured = process.env.NEXT_PUBLIC_BRANCH_IMAGE_URL;
+  if (configured) return configured.replace(/\/+$/, "");
+  return `${getBaseUrl(req)}/images/annanagar.jpeg`;
 }
 
 export async function GET(
@@ -35,18 +39,13 @@ export async function GET(
       return new Response("Voucher not found", { status: 404 });
     }
 
-    let branchImageDataUrl: string | null = null;
-    try {
-      const branchImagePath = path.join(process.cwd(), "public/images/annanagar.jpeg");
-      const imageBuffer = fs.readFileSync(branchImagePath);
-      branchImageDataUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
-    } catch (err) {
-      console.error("[voucher-image] Failed to load branch image:", err);
-    }
+    const branchImageUrl = getBranchImageUrl(req);
 
     let qrDataUrl: string | null = null;
     try {
-      const scanUrl = `${getBaseUrl(req)}/voucher/${encodeURIComponent(customer.voucherId)}`;
+      const scanUrl = `${getBaseUrl(req)}/voucher/${encodeURIComponent(
+        customer.voucherId
+      )}?customer=${encodeURIComponent(customer.whatsappNumber)}`;
       qrDataUrl = await QRCode.toDataURL(scanUrl, {
         margin: 1,
         width: 220,
@@ -231,13 +230,13 @@ export async function GET(
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: "20px",
-                  width: "280px",
+                  // gap: "20px",
+                  // width: "280px",
                 }}
               >
-                {branchImageDataUrl && (
+                {/* {branchImageUrl && (
                   <img
-                    src={branchImageDataUrl}
+                    src={branchImageUrl}
                     width={260}
                     height={150}
                     style={{
@@ -247,7 +246,7 @@ export async function GET(
                     }}
                     alt="Bhima showroom"
                   />
-                )}
+                )} */}
 
                 {qrDataUrl && (
                   <div
