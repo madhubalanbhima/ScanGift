@@ -5,6 +5,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Customer } from "@/models/Customer";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function getBaseUrl(req: NextRequest): string {
   const configured = process.env.NEXT_PUBLIC_BASE_URL;
@@ -40,15 +42,7 @@ export async function GET(
     }
 
     const baseUrl = getBaseUrl(req);
-    const backgroundUrl = `${baseUrl}/images/bg.png`;
-    const badgeUrl = `${baseUrl}/images/101.png`;
-    const figureUrl = `${baseUrl}/images/bhima-boy.png`;
-    const modelUrl = `${baseUrl}/images/model.png`;
-    const giftUrl = `${baseUrl}/images/gift.png`;
-    const grandUrl = `${baseUrl}/images/grand.png`;
-    const amountUrl = `${baseUrl}/images/5000.png`;
-    const logoUrl = `${baseUrl}/images/logo.png`;
-
+    
     let qrDataUrl: string | null = null;
     try {
       const scanUrl = `${baseUrl}/voucher/${encodeURIComponent(
@@ -63,167 +57,143 @@ export async function GET(
       console.error("[voucher-image] Failed to generate QR code:", err);
     }
 
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
             position: "relative",
             width: "1200px",
             height: "630px",
-            overflow: "hidden",
-            borderRadius: "20px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
             fontFamily: "Arial, sans-serif",
-            background: "#f5f5f5",
+            color: "#ffffff",
           }}
         >
-          <img
-            src={backgroundUrl}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              zIndex: 1,
-            }}
-            alt="Bhima voucher background"
-          />
-
+          {/* Top Section: Bhima Header */}
           <div
             style={{
-              position: "absolute",
-              top: "20px",
-              left: "30px",
-              zIndex: 10,
-            }}
-          >
-            <img src={badgeUrl} alt="10 Years" style={{ width: "180px", height: "auto" }} />
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "0px",
-              zIndex: 10,
-            }}
-          >
-            <img src={figureUrl} alt="Bhima figure" style={{ width: "180px", height: "auto" }} />
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: "25%",
-              height: "100%",
-              zIndex: 5,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <img
-              src={modelUrl}
-              alt="Bhima model"
-              style={{
-                width: "130%",
-                height: "90%",
-                objectFit: "cover",
-                position: "absolute",
-                left: "30%",
-                top: "10%",
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              left: "25%",
-              right: "20%",
-              top: "50%",
-              transform: "translateY(-50%)",
-              zIndex: 8,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "20px",
+              marginBottom: "30px",
+              borderBottom: "2px solid #d4af37",
+              paddingBottom: "20px",
+              width: "90%",
             }}
           >
             <div
               style={{
-                position: "absolute",
-                bottom: "240px",
+                fontSize: "24px",
+                fontWeight: "bold",
+                letterSpacing: "4px",
+                color: "#d4af37",
+              }}
+            >
+              BHIMA GOLD
+            </div>
+            <div
+              style={{
+                fontSize: "48px",
+                fontWeight: "900",
+                letterSpacing: "6px",
+                color: "#f4d36d",
+                marginTop: "10px",
+              }}
+            >
+              B H I M A
+            </div>
+          </div>
+
+          {/* Middle Section: Customer Info and QR */}
+          <div
+            style={{
+              display: "flex",
+              width: "90%",
+              gap: "40px",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flex: 1,
+            }}
+          >
+            {/* Left: Customer Details */}
+            <div
+              style={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                gap: "20px",
               }}
             >
-              <img src={giftUrl} alt="Gift" style={{ width: "260px", height: "auto" }} />
+              <div>
+                <div style={{ fontSize: "14px", color: "#d4af37", letterSpacing: "2px" }}>
+                  E-VOUCHER
+                </div>
+                <div style={{ fontSize: "36px", fontWeight: "bold", color: "#f4d36d" }}>
+                  {customer.fullName}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: "14px", color: "#999" }}>Voucher ID</div>
+                <div style={{ fontSize: "40px", fontWeight: "bold", color: "#d4af37" }}>
+                  {customer.voucherId}
+                </div>
+              </div>
             </div>
 
-            <div
-              style={{
-                width: "280px",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <img src={grandUrl} alt="Grand Opening" style={{ width: "200%", height: "auto" }} />
-            </div>
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              right: "30px",
-              top: "78%",
-              transform: "translateY(-50%)",
-              zIndex: 9,
-              width: "360px",
-            }}
-          >
-            <img src={amountUrl} alt="₹5000" style={{ width: "100%", height: "auto" }} />
-          </div>
-
-          <div
-            style={{
-              position: "absolute",
-              right: "130px",
-              bottom: "40px",
-              zIndex: 9,
-              background: "#ffffff",
-              borderRadius: "12px",
-              padding: "10px",
-              boxShadow: "0 5px 15px rgba(0,0,0,0.15)",
-            }}
-          >
+            {/* Right: QR Code */}
             {qrDataUrl && (
-              <img
-                src={qrDataUrl}
-                alt="Voucher QR code"
-                style={{ width: "110px", height: "110px", display: "block" }}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  background: "#ffffff",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  boxShadow: "0 5px 20px rgba(0,0,0,0.3)",
+                }}
+              >
+                <img
+                  src={qrDataUrl}
+                  width="120"
+                  height="120"
+                  alt="Voucher QR code"
+                  style={{ display: "block" }}
+                />
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#181511",
+                    marginTop: "8px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Scan to Verify
+                </div>
+              </div>
             )}
           </div>
 
+          {/* Footer: Amount */}
           <div
             style={{
-              position: "absolute",
-              bottom: "20px",
-              left: "25%",
-              right: "20%",
-              zIndex: 8,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "8px",
+              marginTop: "30px",
+              borderTop: "2px solid #d4af37",
+              paddingTop: "20px",
+              width: "90%",
             }}
           >
-            <div style={{ width: "260px", display: "flex", justifyContent: "center" }}>
-              <img src={logoUrl} alt="Bhima Logo" style={{ width: "100%", height: "auto" }} />
+            <div style={{ fontSize: "32px", fontWeight: "bold", color: "#f4d36d" }}>
+              ₹ 5000
+            </div>
+            <div style={{ fontSize: "14px", color: "#999", marginTop: "8px" }}>
+              Gift Voucher
             </div>
           </div>
         </div>
@@ -233,6 +203,11 @@ export async function GET(
         height: 630,
       }
     );
+
+    imageResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    imageResponse.headers.set("Pragma", "no-cache");
+    imageResponse.headers.set("Expires", "0");
+    return imageResponse;
   } catch (err) {
     console.error("[voucher-image] Unhandled error:", err);
     return new Response("Failed to generate voucher image", { status: 500 });
