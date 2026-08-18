@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
     "mongoose": "^8.5.0",
     "next": "^14.2.35",
@@ -25,6 +27,7 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
+    "tsx": "^4.23.12",
     "typescript": "^5.5.2"
   }
 }

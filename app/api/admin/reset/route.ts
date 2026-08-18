@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
+import { isAuthorizedAdminRequest } from "@/lib/adminAuth";
 import { Customer } from "@/models/Customer";
 import { Counter, resetCounter } from "@/models/Counter";
 
 export async function POST(req: NextRequest) {
-  const token = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
-  if (!isValidSessionToken(token)) {
+  if (!isAuthorizedAdminRequest(req)) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 
