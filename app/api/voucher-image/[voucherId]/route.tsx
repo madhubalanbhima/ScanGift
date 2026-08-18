@@ -35,17 +35,15 @@ export async function GET(
       return new Response("Voucher not found", { status: 404 });
     }
 
-    // Load Bhima logo image
-    let bhimaImageDataUrl: string | null = null;
+    let branchImageDataUrl: string | null = null;
     try {
-      const bhimaImagePath = path.join(process.cwd(), "public/images/annanagar.jpeg");
-      const imageBuffer = fs.readFileSync(bhimaImagePath);
-      bhimaImageDataUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
+      const branchImagePath = path.join(process.cwd(), "public/images/annanagar.jpeg");
+      const imageBuffer = fs.readFileSync(branchImagePath);
+      branchImageDataUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
     } catch (err) {
-      console.error("[voucher-image] Failed to load Bhima logo:", err);
+      console.error("[voucher-image] Failed to load branch image:", err);
     }
 
-    // Generate a unique QR code linking to this voucher's scan/verification page.
     let qrDataUrl: string | null = null;
     try {
       const scanUrl = `${getBaseUrl(req)}/voucher/${encodeURIComponent(customer.voucherId)}`;
@@ -73,29 +71,26 @@ export async function GET(
             display: "flex",
             background: "#181511",
             fontFamily: "sans-serif",
-            position: "relative",
           }}
         >
           <div
             style={{
               display: "flex",
+              flexDirection: "column",
               flex: 1,
               margin: "36px",
               border: "2px solid #b8892b",
               borderRadius: "18px",
               background: "linear-gradient(135deg, #221d16 0%, #181511 60%)",
-              position: "relative",
               overflow: "hidden",
             }}
           >
+            {/* Letterhead banner */}
             <div
               style={{
-                position: "absolute",
-                top: "28px",
-                left: "28px",
-                right: "28px",
                 display: "flex",
                 justifyContent: "center",
+                padding: "32px 48px 0 48px",
               }}
             >
               <div
@@ -104,10 +99,10 @@ export async function GET(
                   flexDirection: "column",
                   alignItems: "center",
                   width: "100%",
-                  maxWidth: "860px",
                   background: "#0d0d09",
                   border: "2px solid #d7ae52",
-                  padding: "18px 24px 12px",
+                  borderRadius: "6px",
+                  padding: "16px 24px",
                   textAlign: "center",
                 }}
               >
@@ -115,11 +110,11 @@ export async function GET(
                   style={{
                     display: "flex",
                     color: "#f4d36d",
-                    fontSize: "26px",
+                    fontSize: "20px",
                     fontWeight: 900,
                     letterSpacing: "6px",
                     textTransform: "uppercase",
-                    marginBottom: "8px",
+                    marginBottom: "6px",
                   }}
                 >
                   Bhima Gold
@@ -128,9 +123,9 @@ export async function GET(
                   style={{
                     display: "flex",
                     color: "#f4d36d",
-                    fontSize: "62px",
+                    fontSize: "46px",
                     fontWeight: 900,
-                    letterSpacing: "10px",
+                    letterSpacing: "8px",
                     textTransform: "uppercase",
                     lineHeight: "1",
                   }}
@@ -141,10 +136,10 @@ export async function GET(
                   style={{
                     display: "flex",
                     color: "#f4d36d",
-                    fontSize: "18px",
-                    letterSpacing: "5px",
+                    fontSize: "15px",
+                    letterSpacing: "4px",
                     textTransform: "uppercase",
-                    marginTop: "12px",
+                    marginTop: "8px",
                   }}
                 >
                   Gold • Diamonds • Silver • Platinum
@@ -152,116 +147,139 @@ export async function GET(
               </div>
             </div>
 
-            {/* Bhima logo */}
-            {bhimaImageDataUrl && (
-              <img
-                src={bhimaImageDataUrl}
-                width={120}
-                height={120}
-                style={{
-                  position: "absolute",
-                  top: "36px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                }}
-                alt="Bhima"
-              />
-            )}
-
-            {/* Unique redemption QR code */}
-            {qrDataUrl && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "36px",
-                  right: "36px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  background: "#ffffff",
-                  borderRadius: "10px",
-                  padding: "10px",
-                }}
-              >
-                <img src={qrDataUrl} width={110} height={110} alt="Redemption QR code" />
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#181511",
-                    fontSize: "11px",
-                    letterSpacing: "1px",
-                    textTransform: "uppercase",
-                    marginTop: "4px",
-                  }}
-                >
-                  Scan to verify
-                </div>
-              </div>
-            )}
-
+            {/* Body: voucher details (left) + branch photo + QR (right) */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                padding: "64px",
-                width: "100%",
-                marginTop: "160px",
+                flex: 1,
+                padding: "36px 48px 40px 48px",
+                gap: "40px",
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#d9ad4f",
-                    fontSize: "20px",
-                    letterSpacing: "6px",
-                    textTransform: "uppercase",
-                    marginBottom: "18px",
-                  }}
-                >
-                  E - V O U C H E R
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f7f2e7",
-                    fontSize: "52px",
-                    fontWeight: 700,
-                    lineHeight: "1.15",
-                    maxWidth: "760px",
-                  }}
-                >
-                  {customer.fullName}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "baseline",
-                    gap: "16px",
-                  }}
-                >
-                  <span style={{ display: "flex", color: "#8a651c", fontSize: "22px" }}>
-                    Voucher ID
-                  </span>
-                  <span
+              {/* Left column */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  flex: 1.3,
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div
                     style={{
                       display: "flex",
                       color: "#d9ad4f",
-                      fontSize: "44px",
-                      fontWeight: 700,
-                      letterSpacing: "1px",
+                      fontSize: "18px",
+                      letterSpacing: "6px",
+                      textTransform: "uppercase",
+                      marginBottom: "16px",
                     }}
                   >
-                    {customer.voucherId}
-                  </span>
+                    E - V O U C H E R
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      color: "#f7f2e7",
+                      fontSize: "48px",
+                      fontWeight: 700,
+                      lineHeight: "1.15",
+                      maxWidth: "480px",
+                    }}
+                  >
+                    {customer.fullName}
+                  </div>
                 </div>
-                <div style={{ display: "flex", color: "#8f8879", fontSize: "20px" }}>
-                  Issued {issuedDate}
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "14px" }}>
+                    <span style={{ display: "flex", color: "#8a651c", fontSize: "20px" }}>
+                      Voucher ID
+                    </span>
+                    <span
+                      style={{
+                        display: "flex",
+                        color: "#d9ad4f",
+                        fontSize: "40px",
+                        fontWeight: 700,
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      {customer.voucherId}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", color: "#8f8879", fontSize: "18px" }}>
+                    Issued {issuedDate}
+                  </div>
                 </div>
+              </div>
+
+              {/* Divider */}
+              <div
+                style={{
+                  display: "flex",
+                  width: "2px",
+                  background: "#3a3226",
+                }}
+              />
+
+              {/* Right column: branch photo + QR */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "20px",
+                  width: "280px",
+                }}
+              >
+                {branchImageDataUrl && (
+                  <img
+                    src={branchImageDataUrl}
+                    width={260}
+                    height={150}
+                    style={{
+                      borderRadius: "10px",
+                      border: "2px solid #8a651c",
+                      objectFit: "cover",
+                    }}
+                    alt="Bhima showroom"
+                  />
+                )}
+
+                {qrDataUrl && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      background: "#ffffff",
+                      borderRadius: "10px",
+                      padding: "10px",
+                    }}
+                  >
+                    <img
+                      src={qrDataUrl}
+                      width={110}
+                      height={110}
+                      alt="Redemption QR code"
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        color: "#181511",
+                        fontSize: "11px",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                        marginTop: "4px",
+                      }}
+                    >
+                      Scan to verify
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

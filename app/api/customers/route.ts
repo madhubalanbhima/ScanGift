@@ -9,7 +9,7 @@ import {
   normalizeWhatsappNumber,
 } from "@/lib/validators";
 import { sendVoucherOnWhatsApp } from "@/lib/whatsapp";
-import { ADMIN_COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
+import { isAuthorizedAdminRequest } from "@/lib/adminAuth";
 
 function getBaseUrl(req: NextRequest): string {
   const configured = process.env.NEXT_PUBLIC_BASE_URL;
@@ -95,8 +95,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
-  if (!isValidSessionToken(token)) {
+  if (!isAuthorizedAdminRequest(req)) {
     return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
   }
 

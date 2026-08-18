@@ -1,41 +1,54 @@
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
-export const ADMIN_COOKIE_NAME = "egold_admin_session";
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
-
-function getSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET;
+function getJwtSecret(): string {
+  const secret = process.env.ADMIN_JWT_SECRET;
   if (!secret) {
-    throw new Error("Missing ADMIN_SESSION_SECRET environment variable.");
+    throw new Error("Missing ADMIN_JWT_SECRET environment variable.");
   }
   return secret;
 }
 
-function sign(value: string): string {
-  return crypto.createHmac("sha256", getSecret()).update(value).digest("hex");
+export function createAdminJwt(payload: Record<string, unknown> = { role: "admin" }): string {
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
-/** Creates a signed session token: "<expiryTimestamp>.<signature>" */
-export function createSessionToken(): string {
-  const expiry = (Date.now() + SESSION_TTL_MS).toString();
-  const signature = sign(expiry);
-  return `${expiry}.${signature}`;
-}
-
-/** Verifies a session token's signature and expiry. */
-export function isValidSessionToken(token: string | undefined | null): boolean {
+export function verifyAdminJwt(token: string | undefined | null): boolean {
   if (!token) return false;
-  const [expiry, signature] = token.split(".");
-  if (!expiry || !signature) return false;
 
-  const expected = sign(expiry);
-  const signatureBuffer = Buffer.from(signature);
+  try {
+    const decoded = jwt.verify(token, getJwtSecret());
+    return !!decoded;
+  } catch {
+    return false;
+  }
+}
+
+export function getAdminApiKey(): string | undefined {
+  return process.env.ADMIN_API_KEY;
+}
+
+export function isValidAdminApiKey(apiKey: string | undefined | null): boolean {
+  const expected = getAdminApiKey();
+  if (!expected || !apiKey) return false;
+
+  const actualBuffer = Buffer.from(apiKey);
   const expectedBuffer = Buffer.from(expected);
+  if (actualBuffer.length !== expectedBuffer.length) return false;
 
-  if (signatureBuffer.length !== expectedBuffer.length) return false;
-  if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) return false;
+  return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
+}
 
-  return Number(expiry) > Date.now();
+export function isAuthorizedAdminRequest(req: Request | { headers?: Headers }): boolean {
+  const headerMap = req.headers;
+  const authHeader = headerMap?.get?.("authorization") ?? "";
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  const apiKey = headerMap?.get?.("x-admin-api-key") ?? "";
+
+  if (isValidAdminApiKey(apiKey)) return true;
+  if (verifyAdminJwt(bearerToken)) return true;
+
+  return false;
 }
 
 export function checkAdminPassword(password: string): boolean {

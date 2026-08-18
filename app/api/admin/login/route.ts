@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  ADMIN_COOKIE_NAME,
-  checkAdminPassword,
-  createSessionToken,
-} from "@/lib/adminAuth";
+import { checkAdminPassword, createAdminJwt } from "@/lib/adminAuth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,16 +13,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = createSessionToken();
-    const response = NextResponse.json({ success: true });
-    response.cookies.set(ADMIN_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-    return response;
+    const token = createAdminJwt({ sub: "admin", role: "admin" });
+    return NextResponse.json({ success: true, token });
   } catch (err) {
     console.error("POST /api/admin/login error:", err);
     return NextResponse.json(
