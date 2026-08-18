@@ -39,11 +39,19 @@ export async function GET(
       return new Response("Voucher not found", { status: 404 });
     }
 
-    const branchImageUrl = getBranchImageUrl(req);
+    const baseUrl = getBaseUrl(req);
+    const backgroundUrl = `${baseUrl}/images/bg.png`;
+    const badgeUrl = `${baseUrl}/images/101.png`;
+    const figureUrl = `${baseUrl}/images/bhima-boy.png`;
+    const modelUrl = `${baseUrl}/images/model.png`;
+    const giftUrl = `${baseUrl}/images/gift.png`;
+    const grandUrl = `${baseUrl}/images/grand.png`;
+    const amountUrl = `${baseUrl}/images/5000.png`;
+    const logoUrl = `${baseUrl}/images/logo.png`;
 
     let qrDataUrl: string | null = null;
     try {
-      const scanUrl = `${getBaseUrl(req)}/voucher/${encodeURIComponent(
+      const scanUrl = `${baseUrl}/voucher/${encodeURIComponent(
         customer.voucherId
       )}?customer=${encodeURIComponent(customer.whatsappNumber)}`;
       qrDataUrl = await QRCode.toDataURL(scanUrl, {
@@ -55,231 +63,167 @@ export async function GET(
       console.error("[voucher-image] Failed to generate QR code:", err);
     }
 
-    const issuedDate = new Date(customer.createdAt).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
     return new ImageResponse(
       (
         <div
           style={{
+            position: "relative",
             width: "1200px",
             height: "630px",
-            display: "flex",
-            background: "#181511",
-            fontFamily: "sans-serif",
+            overflow: "hidden",
+            borderRadius: "20px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+            fontFamily: "Arial, sans-serif",
+            background: "#f5f5f5",
           }}
         >
+          <img
+            src={backgroundUrl}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: 1,
+            }}
+            alt="Bhima voucher background"
+          />
+
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              margin: "36px",
-              border: "2px solid #b8892b",
-              borderRadius: "18px",
-              background: "linear-gradient(135deg, #221d16 0%, #181511 60%)",
-              overflow: "hidden",
+              position: "absolute",
+              top: "20px",
+              left: "30px",
+              zIndex: 10,
             }}
           >
-            {/* Letterhead banner */}
+            <img src={badgeUrl} alt="10 Years" style={{ width: "180px", height: "auto" }} />
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "0px",
+              zIndex: 10,
+            }}
+          >
+            <img src={figureUrl} alt="Bhima figure" style={{ width: "180px", height: "auto" }} />
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "25%",
+              height: "100%",
+              zIndex: 5,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={modelUrl}
+              alt="Bhima model"
+              style={{
+                width: "130%",
+                height: "90%",
+                objectFit: "cover",
+                position: "absolute",
+                left: "30%",
+                top: "10%",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              left: "25%",
+              right: "20%",
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "20px",
+            }}
+          >
             <div
               style={{
+                position: "absolute",
+                bottom: "240px",
                 display: "flex",
-                justifyContent: "center",
-                padding: "32px 48px 0 48px",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
-                  background: "#0d0d09",
-                  border: "2px solid #d7ae52",
-                  borderRadius: "6px",
-                  padding: "16px 24px",
-                  textAlign: "center",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "20px",
-                    fontWeight: 900,
-                    letterSpacing: "6px",
-                    textTransform: "uppercase",
-                    marginBottom: "6px",
-                  }}
-                >
-                  Bhima Gold
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "46px",
-                    fontWeight: 900,
-                    letterSpacing: "8px",
-                    textTransform: "uppercase",
-                    lineHeight: "1",
-                  }}
-                >
-                  B H I M A
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "15px",
-                    letterSpacing: "4px",
-                    textTransform: "uppercase",
-                    marginTop: "8px",
-                  }}
-                >
-                  Gold • Diamonds • Silver • Platinum
-                </div>
-              </div>
+              <img src={giftUrl} alt="Gift" style={{ width: "260px", height: "auto" }} />
             </div>
 
-            {/* Body: voucher details (left) + branch photo + QR (right) */}
             <div
               style={{
+                width: "280px",
                 display: "flex",
-                flex: 1,
-                padding: "36px 48px 40px 48px",
-                gap: "40px",
+                justifyContent: "center",
               }}
             >
-              {/* Left column */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  flex: 1.3,
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      color: "#d9ad4f",
-                      fontSize: "18px",
-                      letterSpacing: "6px",
-                      textTransform: "uppercase",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    E - V O U C H E R
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      color: "#f7f2e7",
-                      fontSize: "48px",
-                      fontWeight: 700,
-                      lineHeight: "1.15",
-                      maxWidth: "480px",
-                    }}
-                  >
-                    {customer.fullName}
-                  </div>
-                </div>
+              <img src={grandUrl} alt="Grand Opening" style={{ width: "200%", height: "auto" }} />
+            </div>
+          </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "14px" }}>
-                    <span style={{ display: "flex", color: "#8a651c", fontSize: "20px" }}>
-                      Voucher ID
-                    </span>
-                    <span
-                      style={{
-                        display: "flex",
-                        color: "#d9ad4f",
-                        fontSize: "40px",
-                        fontWeight: 700,
-                        letterSpacing: "1px",
-                      }}
-                    >
-                      {customer.voucherId}
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", color: "#8f8879", fontSize: "18px" }}>
-                    Issued {issuedDate}
-                  </div>
-                </div>
-              </div>
+          <div
+            style={{
+              position: "absolute",
+              right: "30px",
+              top: "78%",
+              transform: "translateY(-50%)",
+              zIndex: 9,
+              width: "360px",
+            }}
+          >
+            <img src={amountUrl} alt="₹5000" style={{ width: "100%", height: "auto" }} />
+          </div>
 
-              {/* Divider */}
-              <div
-                style={{
-                  display: "flex",
-                  width: "2px",
-                  background: "#3a3226",
-                }}
+          <div
+            style={{
+              position: "absolute",
+              right: "130px",
+              bottom: "40px",
+              zIndex: 9,
+              background: "#ffffff",
+              borderRadius: "12px",
+              padding: "10px",
+              boxShadow: "0 5px 15px rgba(0,0,0,0.15)",
+            }}
+          >
+            {qrDataUrl && (
+              <img
+                src={qrDataUrl}
+                alt="Voucher QR code"
+                style={{ width: "110px", height: "110px", display: "block" }}
               />
+            )}
+          </div>
 
-              {/* Right column: branch photo + QR */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  // gap: "20px",
-                  // width: "280px",
-                }}
-              >
-                {/* {branchImageUrl && (
-                  <img
-                    src={branchImageUrl}
-                    width={260}
-                    height={150}
-                    style={{
-                      borderRadius: "10px",
-                      border: "2px solid #8a651c",
-                      objectFit: "cover",
-                    }}
-                    alt="Bhima showroom"
-                  />
-                )} */}
-
-                {qrDataUrl && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      background: "#ffffff",
-                      borderRadius: "10px",
-                      padding: "10px",
-                    }}
-                  >
-                    <img
-                      src={qrDataUrl}
-                      width={110}
-                      height={110}
-                      alt="Redemption QR code"
-                    />
-                    <div
-                      style={{
-                        display: "flex",
-                        color: "#181511",
-                        fontSize: "11px",
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Scan to verify
-                    </div>
-                  </div>
-                )}
-              </div>
+          <div
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              left: "25%",
+              right: "20%",
+              zIndex: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <div style={{ width: "260px", display: "flex", justifyContent: "center" }}>
+              <img src={logoUrl} alt="Bhima Logo" style={{ width: "100%", height: "auto" }} />
             </div>
           </div>
         </div>
