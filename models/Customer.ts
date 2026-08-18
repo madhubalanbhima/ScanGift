@@ -10,6 +10,9 @@ export interface ICustomer {
   voucherSequence: number; // e.g. 1
   deliveryStatus: "sent" | "failed" | "pending";
   deliveryError?: string;
+  redeemed: boolean;
+  redeemedAt?: Date;
+  scanCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +31,9 @@ const CustomerSchema = new Schema<ICustomer>(
       default: "pending",
     },
     deliveryError: { type: String },
+    redeemed: { type: Boolean, default: false },
+    redeemedAt: { type: Date },
+    scanCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
