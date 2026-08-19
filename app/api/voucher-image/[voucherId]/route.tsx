@@ -140,7 +140,7 @@ export async function GET(
             style={{
               position: "absolute",
               top: "0px",
-              left: "300px",
+              left: "150px",
               right: "160px",
               bottom: "0px",
               display: "flex",
@@ -151,7 +151,7 @@ export async function GET(
             }}
           >
             {giftImage && (
-              <img src={giftImage} width={460} height={250} style={{ objectFit: "contain" }} alt="Gift" />
+              <img src={giftImage} width={360} height={350} style={{ objectFit: "contain" }} alt="Gift" />
             )}
             {grandImage && (
               <img
@@ -170,7 +170,7 @@ export async function GET(
               src={amountImage}
               width={550}
               height={530}
-              style={{ position: "absolute", right: "20px", bottom: "100px", objectFit: "contain" }}
+              style={{ position: "absolute", right: "10px", top: "80px", objectFit: "contain" }}
               alt="₹5000"
             />
           )}
@@ -181,7 +181,7 @@ export async function GET(
             <div
               style={{
                 position: "absolute",
-                left: "100px",
+                left: "80px",
                 bottom: "50px",
                 display: "flex",
                 flexDirection: "column",
@@ -241,7 +241,7 @@ export async function GET(
         </div>
       ),
       {
-        width: 1200,
+        width: 1000,
         height: 630,
       }
     );
