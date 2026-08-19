@@ -142,7 +142,7 @@ export async function GET(
               top: "0px",
               left: "230px",
               right: "270px",
-              bottom: "90px",
+              bottom: "100px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -156,8 +156,8 @@ export async function GET(
             {grandImage && (
               <img
                 src={grandImage}
-                width={320}
-                height={170}
+                width={420}
+                height={270}
                 style={{ objectFit: "contain" }}
                 alt="Grand Opening"
               />
@@ -168,9 +168,9 @@ export async function GET(
           {amountImage && (
             <img
               src={amountImage}
-              width={300}
-              height={290}
-              style={{ position: "absolute", right: "20px", top: "50px", objectFit: "contain" }}
+              width={400}
+              height={390}
+              style={{ position: "absolute", right: "20px", top: "150px", objectFit: "contain" }}
               alt="₹5000"
             />
           )}
@@ -180,7 +180,7 @@ export async function GET(
             <div
               style={{
                 position: "absolute",
-                left: "30px",
+                left: "50px",
                 bottom: "90px",
                 display: "flex",
                 flexDirection: "column",
@@ -190,7 +190,7 @@ export async function GET(
                 padding: "8px",
               }}
             >
-              <img src={qrDataUrl} width={130} height={130} alt="Redemption QR code" />
+              <img src={qrDataUrl} width={180} height={180} alt="Redemption QR code" />
               <div
                 style={{
                   display: "flex",
