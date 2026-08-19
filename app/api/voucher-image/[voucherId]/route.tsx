@@ -125,7 +125,7 @@ export async function GET(
           )}
 
           {/* Left: model image, bleeding to the edge */}
-          {modelImage && (
+          {/* {modelImage && (
             <img
               src={modelImage}
               width={440}
@@ -133,7 +133,7 @@ export async function GET(
               style={{ position: "absolute", left: "50px", top: "100px", objectFit: "cover" }}
               alt="Bhima Model"
             />
-          )}
+          )} */}
 
           {/* Center: gift label + grand opening badge, stacked and centered */}
           <div
@@ -151,13 +151,13 @@ export async function GET(
             }}
           >
             {giftImage && (
-              <img src={giftImage} width={560} height={250} style={{ objectFit: "contain" }} alt="Gift" />
+              <img src={giftImage} width={460} height={250} style={{ objectFit: "contain" }} alt="Gift" />
             )}
             {grandImage && (
               <img
                 src={grandImage}
-                width={340}
-                height={160}
+                width={500}
+                height={350}
                 style={{ objectFit: "contain" }}
                 alt="Grand Opening"
               />
@@ -170,7 +170,7 @@ export async function GET(
               src={amountImage}
               width={550}
               height={530}
-              style={{ position: "absolute", right: "20px", bottom: "150px", objectFit: "contain" }}
+              style={{ position: "absolute", right: "20px", bottom: "100px", objectFit: "contain" }}
               alt="₹5000"
             />
           )}
@@ -182,7 +182,7 @@ export async function GET(
               style={{
                 position: "absolute",
                 left: "100px",
-                bottom: "24px",
+                bottom: "50px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
