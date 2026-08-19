@@ -140,24 +140,24 @@ export async function GET(
             style={{
               position: "absolute",
               top: "0px",
-              left: "150px",
-              right: "160px",
-              bottom: "0px",
+              left: "230px",
+              right: "270px",
+              bottom: "90px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              gap: "24px",
+              gap: "8px",
             }}
           >
             {giftImage && (
-              <img src={giftImage} width={360} height={350} style={{ objectFit: "contain" }} alt="Gift" />
+              <img src={giftImage} width={300} height={160} style={{ objectFit: "contain" }} alt="Gift" />
             )}
             {grandImage && (
               <img
                 src={grandImage}
-                width={500}
-                height={350}
+                width={320}
+                height={170}
                 style={{ objectFit: "contain" }}
                 alt="Grand Opening"
               />
@@ -168,30 +168,29 @@ export async function GET(
           {amountImage && (
             <img
               src={amountImage}
-              width={550}
-              height={530}
-              style={{ position: "absolute", right: "10px", top: "80px", objectFit: "contain" }}
+              width={300}
+              height={290}
+              style={{ position: "absolute", right: "20px", top: "50px", objectFit: "contain" }}
               alt="₹5000"
             />
           )}
 
-          {/* QR code — dynamic, unique per voucher (position not specified in the
-              original CSS, placed bottom-left) */}
+          {/* QR code — bottom-left, sized to leave room for the footer bar */}
           {qrDataUrl && (
             <div
               style={{
                 position: "absolute",
-                left: "80px",
-                bottom: "50px",
+                left: "30px",
+                bottom: "90px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 background: "#ffffff",
-                borderRadius: "10px",
-                padding: "10px",
+                borderRadius: "8px",
+                padding: "8px",
               }}
             >
-              <img src={qrDataUrl} width={200} height={200} alt="Redemption QR code" />
+              <img src={qrDataUrl} width={130} height={130} alt="Redemption QR code" />
               <div
                 style={{
                   display: "flex",
@@ -207,32 +206,27 @@ export async function GET(
             </div>
           )}
 
-          {/* Footer: logo + per-customer voucher details */}
+          {/* Footer: per-customer voucher details pinned to bottom, full width */}
           <div
             style={{
               position: "absolute",
-              bottom: "20px",
-              left: "200px",
-              right: "20px",
+              bottom: "0px",
+              left: "0px",
+              right: "0px",
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              gap: "6px",
+              justifyContent: "center",
+              background: "rgba(255,255,255,0.92)",
+              padding: "10px 24px",
             }}
           >
-            {/* {logoImage && (
-              <img src={logoImage} width={200} height={70} style={{ objectFit: "contain" }} alt="BHIMA" />
-            )} */}
             <div
               style={{
                 display: "flex",
-                color: "#4a4a4a",
-                fontSize: "35px",
+                color: "#2a1a00",
+                fontSize: "26px",
                 fontWeight: 700,
-                letterSpacing: "1px",
-                background: "#ffffff",
-                padding: "4px 16px",
-                borderRadius: "6px",
+                letterSpacing: "0.5px",
               }}
             >
               {customer.fullName} · {customer.voucherId} · Issued {issuedDate}
@@ -241,7 +235,7 @@ export async function GET(
         </div>
       ),
       {
-        width: 1000,
+        width: 1200,
         height: 630,
       }
     );
