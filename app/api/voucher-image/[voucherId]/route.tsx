@@ -16,6 +16,20 @@ function getBaseUrl(req: NextRequest): string {
   return `${proto}://${host}`;
 }
 
+// Reads a file from public/images/ and returns a base64 data URI, or null if
+// it can't be found/read — callers must handle the null case gracefully so a
+// single missing asset never crashes the whole image.
+function loadImageDataUri(filename: string, mime = "image/png"): string | null {
+  try {
+    const filePath = path.join(process.cwd(), "public/images", filename);
+    const buffer = fs.readFileSync(filePath);
+    return `data:${mime};base64,${buffer.toString("base64")}`;
+  } catch (err) {
+    console.error(`[voucher-image] Failed to load ${filename}:`, err);
+    return null;
+  }
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { voucherId: string } }
@@ -35,21 +49,23 @@ export async function GET(
       return new Response("Voucher not found", { status: 404 });
     }
 
-    let branchImageDataUrl: string | null = null;
-    try {
-      const branchImagePath = path.join(process.cwd(), "public/images/annanagar.jpeg");
-      const imageBuffer = fs.readFileSync(branchImagePath);
-      branchImageDataUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
-    } catch (err) {
-      console.error("[voucher-image] Failed to load branch image:", err);
-    }
+    // Load all static promotional assets. Any of these can be missing without
+    // crashing the render — the layout just omits that piece.
+    const bgImage = loadImageDataUri("bg.png");
+    const badgeImage = loadImageDataUri("101.png");
+    const figureImage = loadImageDataUri("bhima-boy.png");
+    const modelImage = loadImageDataUri("model.png");
+    const giftImage = loadImageDataUri("gift.png");
+    const grandImage = loadImageDataUri("grand.png");
+    const amountImage = loadImageDataUri("5000.png");
+    const logoImage = loadImageDataUri("logo.png");
 
     let qrDataUrl: string | null = null;
     try {
       const scanUrl = `${getBaseUrl(req)}/voucher/${encodeURIComponent(customer.voucherId)}`;
       qrDataUrl = await QRCode.toDataURL(scanUrl, {
         margin: 1,
-        width: 220,
+        width: 200,
         color: { dark: "#181511", light: "#ffffff" },
       });
     } catch (err) {
@@ -69,218 +85,157 @@ export async function GET(
             width: "1200px",
             height: "630px",
             display: "flex",
-            background: "#181511",
-            fontFamily: "sans-serif",
+            position: "relative",
+            borderRadius: "20px",
+            overflow: "hidden",
+            background: "#1a1410",
           }}
         >
+          {/* Background */}
+          {bgImage && (
+            <img
+              src={bgImage}
+              width={1200}
+              height={630}
+              style={{ position: "absolute", top: "0px", left: "0px", objectFit: "cover" }}
+              alt=""
+            />
+          )}
+
+          {/* Top-left: 10 Years badge — adjust width/height to match your asset's real ratio */}
+          {badgeImage && (
+            <img
+              src={badgeImage}
+              width={220}
+              height={140}
+              style={{ position: "absolute", top: "20px", left: "30px", objectFit: "contain" }}
+              alt="10 Years Celebrating"
+            />
+          )}
+
+          {/* Top-right: Bhima boy figure */}
+          {figureImage && (
+            <img
+              src={figureImage}
+              width={150}
+              height={220}
+              style={{ position: "absolute", top: "0px", right: "0px", objectFit: "contain" }}
+              alt="Celebration Figure"
+            />
+          )}
+
+          {/* Left: model image, bleeding to the edge */}
+          {modelImage && (
+            <img
+              src={modelImage}
+              width={440}
+              height={630}
+              style={{ position: "absolute", left: "50px", top: "100px", objectFit: "cover" }}
+              alt="Bhima Model"
+            />
+          )}
+
+          {/* Center: gift label + grand opening badge, stacked and centered */}
           <div
             style={{
+              position: "absolute",
+              top: "0px",
+              left: "300px",
+              right: "160px",
+              bottom: "0px",
               display: "flex",
               flexDirection: "column",
-              flex: 1,
-              margin: "36px",
-              border: "2px solid #b8892b",
-              borderRadius: "18px",
-              background: "linear-gradient(135deg, #221d16 0%, #181511 60%)",
-              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "24px",
             }}
           >
-            {/* Letterhead banner */}
+            {giftImage && (
+              <img src={giftImage} width={560} height={250} style={{ objectFit: "contain" }} alt="Gift" />
+            )}
+            {grandImage && (
+              <img
+                src={grandImage}
+                width={340}
+                height={160}
+                style={{ objectFit: "contain" }}
+                alt="Grand Opening"
+              />
+            )}
+          </div>
+
+          {/* Right: amount badge */}
+          {amountImage && (
+            <img
+              src={amountImage}
+              width={550}
+              height={530}
+              style={{ position: "absolute", right: "20px", bottom: "150px", objectFit: "contain" }}
+              alt="₹5000"
+            />
+          )}
+
+          {/* QR code — dynamic, unique per voucher (position not specified in the
+              original CSS, placed bottom-left) */}
+          {qrDataUrl && (
             <div
               style={{
+                position: "absolute",
+                left: "100px",
+                bottom: "24px",
                 display: "flex",
-                justifyContent: "center",
-                padding: "32px 48px 0 48px",
+                flexDirection: "column",
+                alignItems: "center",
+                background: "#ffffff",
+                borderRadius: "10px",
+                padding: "10px",
               }}
             >
+              <img src={qrDataUrl} width={200} height={200} alt="Redemption QR code" />
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
-                  background: "#0d0d09",
-                  border: "2px solid #d7ae52",
-                  borderRadius: "6px",
-                  padding: "16px 24px",
-                  textAlign: "center",
+                  color: "#181511",
+                  fontSize: "10px",
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  marginTop: "4px",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "20px",
-                    fontWeight: 900,
-                    letterSpacing: "6px",
-                    textTransform: "uppercase",
-                    marginBottom: "6px",
-                  }}
-                >
-                  Bhima Gold
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "46px",
-                    fontWeight: 900,
-                    letterSpacing: "8px",
-                    textTransform: "uppercase",
-                    lineHeight: "1",
-                  }}
-                >
-                  B H I M A
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    color: "#f4d36d",
-                    fontSize: "15px",
-                    letterSpacing: "4px",
-                    textTransform: "uppercase",
-                    marginTop: "8px",
-                  }}
-                >
-                  Gold • Diamonds • Silver • Platinum
-                </div>
+                Scan to verify
               </div>
             </div>
+          )}
 
-            {/* Body: voucher details (left) + branch photo + QR (right) */}
+          {/* Footer: logo + per-customer voucher details */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              left: "200px",
+              right: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            {/* {logoImage && (
+              <img src={logoImage} width={200} height={70} style={{ objectFit: "contain" }} alt="BHIMA" />
+            )} */}
             <div
               style={{
                 display: "flex",
-                flex: 1,
-                padding: "36px 48px 40px 48px",
-                gap: "40px",
+                color: "#4a4a4a",
+                fontSize: "35px",
+                fontWeight: 700,
+                letterSpacing: "1px",
+                background: "#ffffff",
+                padding: "4px 16px",
+                borderRadius: "6px",
               }}
             >
-              {/* Left column */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  flex: 1.3,
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      color: "#d9ad4f",
-                      fontSize: "18px",
-                      letterSpacing: "6px",
-                      textTransform: "uppercase",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    E - V O U C H E R
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      color: "#f7f2e7",
-                      fontSize: "48px",
-                      fontWeight: 700,
-                      lineHeight: "1.15",
-                      maxWidth: "480px",
-                    }}
-                  >
-                    {customer.fullName}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "14px" }}>
-                    <span style={{ display: "flex", color: "#8a651c", fontSize: "20px" }}>
-                      Voucher ID
-                    </span>
-                    <span
-                      style={{
-                        display: "flex",
-                        color: "#d9ad4f",
-                        fontSize: "40px",
-                        fontWeight: 700,
-                        letterSpacing: "1px",
-                      }}
-                    >
-                      {customer.voucherId}
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", color: "#8f8879", fontSize: "18px" }}>
-                    Issued {issuedDate}
-                  </div>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div
-                style={{
-                  display: "flex",
-                  width: "2px",
-                  background: "#3a3226",
-                }}
-              />
-
-              {/* Right column: branch photo + QR */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "20px",
-                  width: "280px",
-                }}
-              >
-                {branchImageDataUrl && (
-                  <img
-                    src={branchImageDataUrl}
-                    width={260}
-                    height={150}
-                    style={{
-                      borderRadius: "10px",
-                      border: "2px solid #8a651c",
-                      objectFit: "cover",
-                    }}
-                    alt="Bhima showroom"
-                  />
-                )}
-
-                {qrDataUrl && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      background: "#ffffff",
-                      borderRadius: "10px",
-                      padding: "10px",
-                    }}
-                  >
-                    <img
-                      src={qrDataUrl}
-                      width={110}
-                      height={110}
-                      alt="Redemption QR code"
-                    />
-                    <div
-                      style={{
-                        display: "flex",
-                        color: "#181511",
-                        fontSize: "11px",
-                        letterSpacing: "1px",
-                        textTransform: "uppercase",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Scan to verify
-                    </div>
-                  </div>
-                )}
-              </div>
+              {customer.fullName} · {customer.voucherId} · Issued {issuedDate}
             </div>
           </div>
         </div>
